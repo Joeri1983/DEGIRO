@@ -1,5 +1,6 @@
 const http = require('http');
 const https = require('https');
+const fs = require('fs');
 const port = process.env.PORT || 3000;
 
 const server = http.createServer(async (req, res) => {
@@ -49,19 +50,26 @@ const server = http.createServer(async (req, res) => {
       const parsedData = new URLSearchParams(data.toString());
       const numericValue = parseFloat(parsedData.get('numericValue'));
 
-      // Get the current date
-      const currentDate = new Date().toLocaleString();
-
-      // Display the entered value and the current date
-      res.statusCode = 200;
-      res.setHeader('Content-Type', 'text/html');
-      res.write('<html><body>');
-      res.write(`<p>Entered numeric value: ${numericValue}</p>`);
-      res.write(`<p>Current Date: ${currentDate}</p>`);
-      res.write('<p>Contents of waardes.csv:</p>');
-      res.write('<pre>Your CSV content here</pre>'); // You can replace 'Your CSV content here' with the actual CSV data.
-      res.write('</body></html>');
-      res.end();
+      // Append the submitted value to the CSV file
+      fs.appendFile('waardes.csv', numericValue + '\n', (err) => {
+        if (err) {
+          console.error(err);
+          res.statusCode = 500;
+          res.end('Error appending to the CSV file.');
+        } else {
+          // Get the current date
+          const currentDate = new Date().toLocaleString();
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/html');
+          res.write('<html><body>');
+          res.write(`<p>Entered numeric value: ${numericValue}</p>`);
+          res.write(`<p>Current Date: ${currentDate}</p>`);
+          res.write('<p>Contents of waardes.csv:</p>');
+          res.write('<pre>Your CSV content here</pre>'); // You can replace this with actual CSV data.
+          res.write('</body></html>');
+          res.end();
+        }
+      });
     });
   }
 });
