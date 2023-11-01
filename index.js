@@ -1,28 +1,8 @@
 const http = require('http');
 const https = require('https');
-const { BlobServiceClient } = require('@azure/storage-blob');
 const port = process.env.PORT || 3000;
 
-// Define your Azure Blob Storage connection string and container name
-const connectionString = 'your-connection-string';
-const containerName = 'your-container-name';
-
-const blobServiceClient = BlobServiceClient.fromConnectionString(connectionString);
-const containerClient = blobServiceClient.getContainerClient(containerName);
-
-async function appendValueToBlobStorage(value) {
-  const blobName = 'waardes.csv';
-
-  const blobClient = containerClient.getAppendBlobClient(blobName);
-  
-  try {
-    const response = await blobClient.appendBlock(value);
-    return response;
-  } catch (error) {
-    console.error('Error appending to Azure Blob Storage:', error);
-    throw error;
-  }
-}
+const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv?sp=rw&st=2023-11-01T12:27:32Z&se=2023-11-01T20:27:32Z&spr=https&sv=2022-11-02&sr=c&sig=ndoa3k5uFv0yLUFOR17nkKFhj2zpJaKe3gzixg7z9yw%3D';
 
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET') {
@@ -53,27 +33,43 @@ const server = http.createServer(async (req, res) => {
       // Parse the form data
       const parsedData = new URLSearchParams(data.toString());
       const numericValue = parseFloat(parsedData.get('numericValue'));
+      
+      // Construct the data to append
+      const valueToAppend = numericValue.toString();
 
-      // Append the submitted value to Azure Blob Storage
-      try {
-        await appendValueToBlobStorage(numericValue.toString() + '\n');
+      // Perform an HTTP PUT request to append data (not recommended)
+      const options = {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'text/plain',
+          'Content-Length': Buffer.byteLength(valueToAppend).toString(),
+        },
+      };
 
-        // Get the current date
-        const currentDate = new Date().toLocaleString();
-        res.statusCode = 200;
-        res.setHeader('Content-Type', 'text/html');
-        res.write('<html><body>');
-        res.write(`<p>Entered numeric value: ${numericValue}</p>`);
-        res.write(`<p>Current Date: ${currentDate}</p>`);
-        res.write('<p>Contents of waardes.csv:</p>');
-        // Fetch and display the updated contents of waardes.csv (if needed)
-        // ...
-        res.write('</body></html>');
-        res.end();
-      } catch (error) {
-        res.statusCode = 500;
-        res.end('Error appending to the CSV file in Azure Blob Storage.');
-      }
+      const req = https.request(azureStorageUrl, options, (response) => {
+        if (response.statusCode === 201) {
+          // Append operation successful
+          // Get the current date
+          const currentDate = new Date().toLocaleString();
+          res.statusCode = 200;
+          res.setHeader('Content-Type', 'text/html');
+          res.write('<html><body>');
+          res.write(`<p>Entered numeric value: ${numericValue}</p>`);
+          res.write(`<p>Current Date: ${currentDate}</p>`);
+          res.write('<p>Contents of waardes.csv:</p>');
+          // Fetch and display the updated contents of waardes.csv (if needed)
+          // ...
+          res.write('</body></html>');
+          res.end();
+        } else {
+          // Append operation failed
+          res.statusCode = response.statusCode;
+          res.end('Error appending to the CSV file in Azure Blob Storage.');
+        }
+      });
+
+      req.write(valueToAppend);
+      req.end();
     });
   }
 });
