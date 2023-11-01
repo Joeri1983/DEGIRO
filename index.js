@@ -39,7 +39,30 @@ const server = http.createServer(async (req, res) => {
     }
   } else if (req.method === 'POST') {
     // Handle form submission
-    // (The form submission code remains the same as in the previous answer)
+    let data = '';
+    req.on('data', (chunk) => {
+      data += chunk;
+    });
+
+    req.on('end', () => {
+      // Parse the form data
+      const parsedData = new URLSearchParams(data.toString());
+      const numericValue = parseFloat(parsedData.get('numericValue'));
+
+      // Get the current date
+      const currentDate = new Date().toLocaleString();
+
+      // Display the entered value and the current date
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/html');
+      res.write('<html><body>');
+      res.write(`<p>Entered numeric value: ${numericValue}</p>`);
+      res.write(`<p>Current Date: ${currentDate}</p>`);
+      res.write('<p>Contents of waardes.csv:</p>');
+      res.write('<pre>Your CSV content here</pre>'); // You can replace 'Your CSV content here' with the actual CSV data.
+      res.write('</body></html>');
+      res.end();
+    });
   }
 });
 
