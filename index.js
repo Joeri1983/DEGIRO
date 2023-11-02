@@ -1,6 +1,5 @@
 const http = require('http');
 const https = require('https');
-const fs = require('fs');
 const querystring = require('querystring');
 const port = process.env.PORT || 3000;
 
@@ -12,32 +11,13 @@ const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
     res.write('<html><body>');
-    res.write('<p>Enter a numeric value:</p>');
     res.write('<form method="POST">');
+    res.write('<p>Enter a numeric value:</p>');
     res.write('<input type="number" name="numericValue"><br>');
     res.write('<input type="submit" value="Submit">');
     res.write('</form>');
-    res.write('<p>Values from waardes.csv:</p>');
-
-    // Fetch and display the contents of waardes.csv
-    https.get(azureStorageUrl, (response) => {
-      let data = '';
-      response.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      response.on('end', () => {
-        const lines = data.trim().split('\n');
-        res.write('<ul>');
-        lines.forEach((line) => {
-          const columns = line.split(';');
-          res.write(`<li>Date: ${columns[0]}, Value: ${columns[1]}</li>`);
-        });
-        res.write('</ul>');
-        res.write('</body></html>');
-        res.end();
-      });
-    });
+    res.write('</body></html>');
+    res.end();
   } else if (req.method === 'POST') {
     let body = '';
     req.on('data', (chunk) => {
