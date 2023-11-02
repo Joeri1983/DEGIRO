@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
     res.write('<html><body>');
-    res.write('<p>Contents of waardes.csv:</p>');
+    res.write('<p>Latest 3 values from waardes.csv sorted by date:</p>');
     
     // Fetch and display the contents of waardes.csv
     https.get(azureStorageUrl, (response) => {
@@ -20,7 +20,23 @@ const server = http.createServer((req, res) => {
       });
 
       response.on('end', () => {
-        res.write(`<pre>${data}</pre>`);
+        const lines = data.trim().split('\n');
+        const sortedLines = lines
+          .map((line) => {
+            const columns = line.split(',');
+            return {
+              date: columns[0],
+              value: columns[1],
+            };
+          })
+          .sort((a, b) => b.date.localeCompare(a.date)) // Sort in descending order
+          .slice(0, 3); // Take the latest 3 values
+
+        res.write('<ul>');
+        sortedLines.forEach((line) => {
+          res.write(`<li>Date: ${line.date}, Value: ${line.value}</li>`);
+        });
+        res.write('</ul>');
         res.write('</body></html>');
         res.end();
       });
