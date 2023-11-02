@@ -1,5 +1,5 @@
 const http = require('http');
-const https = require('https');
+const axios = require('axios');
 const querystring = require('querystring');
 const port = process.env.PORT || 3000;
 
@@ -37,27 +37,28 @@ const server = http.createServer((req, res) => {
 
       // Append the new value to waardes.csv
       const newValue = new Date().toISOString().slice(0, 10).replace(/-/g, '') + ';' + numericValue + '\n';
-      const options = {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'text/plain',
-          'Content-Length': Buffer.byteLength(newValue).toString(),
-        },
-      };
 
-      const req = https.request(azureStorageUrl, options, (response) => {
-        if (response.statusCode === 201) {
-          res.statusCode = 302;
-          res.setHeader('Location', '/');
-          res.end();
-        } else {
-          res.statusCode = response.statusCode;
-          res.end('Error appending to the CSV file in Azure Blob Storage.');
-        }
-      });
-
-      req.write(newValue);
-      req.end();
+      axios
+        .put(azureStorageUrl, newValue, {
+          headers: {
+            'x-ms-blob-type': 'BlockBlob',
+            'x-ms-blob-content-type': 'text/csv',
+          },
+        })
+        .then((response) => {
+          if (response.status === 201) {
+            res.statusCode = 302;
+            res.setHeader('Location', '/');
+            res.end();
+          } else {
+            res.statusCode = response.status;
+            res.end('Error appending to the CSV file in Azure Blob Storage.');
+          }
+        })
+        .catch((error) => {
+          res.statusCode = 500;
+          res.end('Failed to append data. ' + error.message);
+        });
     });
   }
 });
