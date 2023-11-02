@@ -1,16 +1,14 @@
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
-const querystring = require('querystring');
 const port = process.env.PORT || 3000;
 
 const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv';
-const sasToken = 'sp=r&st=2023-11-02T13:39:14Z&se=2024-07-06T20:39:14Z&spr=https&sv=2022-11-02&sr=b&sig=V4N%2FXwNCP5adCkAywcernGU2XOhMuuqXwUmkGoBoqP8%3D';
 
 const server = http.createServer((req, res) => {
   if (req.method === 'GET') {
     // Fetch and display the contents of waardes.csv
-    https.get(azureStorageUrl + '?' + sasToken, (response) => {
+    https.get(azureStorageUrl, (response) => {
       let data = '';
       response.on('data', (chunk) => {
         data += chunk;
@@ -29,11 +27,6 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.write('<html><body>');
-
-        // Add an input bar at the top of the webpage
-        res.write('<input type="text" id="valueInput" placeholder="Enter a value">');
-        res.write('<button onclick="addValue()">Add Value</button>');
-
         res.write('<p>Values:</p>');
 
         // Create a canvas for the chart
@@ -64,14 +57,7 @@ const server = http.createServer((req, res) => {
         res.write('}');
         res.write('}');
         res.write('}');
-        res.write('}');
-        res.write('function addValue() {');
-        res.write('var valueInput = document.getElementById("valueInput");');
-        res.write('var value = valueInput.value;');
-        res.write('var currentDate = new Date().toISOString().slice(0, 10);');
-        res.write('var newValue = currentDate + ";" + value;');
-        res.write('fs.appendFileSync("waardes.csv", newValue + "\\n");');
-        res.write('}');
+        res.write('});');
         res.write('</script>');
 
         res.write('</body></html>');
