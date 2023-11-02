@@ -1,5 +1,4 @@
 const http = require('http');
-const axios = require('axios');
 const querystring = require('querystring');
 const port = process.env.PORT || 3000;
 
@@ -38,29 +37,40 @@ const server = http.createServer((req, res) => {
       // Append the new value to waardes.csv
       const newValue = new Date().toISOString().slice(0, 10).replace(/-/g, '') + ';' + numericValue + '\n';
 
-      axios
-        .put(azureStorageUrl, newValue, {
-          headers: {
-            'x-ms-blob-type': 'BlockBlob',
-            'x-ms-blob-content-type': 'text/csv',
-          },
-        })
-        .then((response) => {
-          if (response.status === 201) {
-            res.statusCode = 302;
-            res.setHeader('Location', '/');
-            res.end();
-          } else {
-            console.error('Error: Unable to append data. Status code:', response.status);
-            res.statusCode = 500;
-            res.end('Failed to append data.');
-          }
-        })
-        .catch((error) => {
-          console.error('Error: Failed to append data.', error);
+      // Create the request options
+      const url = new URL(azureStorageUrl);
+      const options = {
+        hostname: url.hostname,
+        path: url.pathname + url.search,
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'text/plain',
+          'Content-Length': Buffer.byteLength(newValue).toString(),
+          'x-ms-blob-type': 'BlockBlob',
+          'x-ms-blob-content-type': 'text/csv',
+        },
+      };
+
+      const request = http.request(options, (response) => {
+        if (response.statusCode === 201) {
+          res.statusCode = 302;
+          res.setHeader('Location', '/');
+          res.end();
+        } else {
+          console.error('Error: Unable to append data. Status code:', response.statusCode);
           res.statusCode = 500;
-          res.end('Failed to append data. ' + error.message);
-        });
+          res.end('Failed to append data.');
+        }
+      });
+
+      request.on('error', (error) => {
+        console.error('Error: Failed to append data.', error);
+        res.statusCode = 500;
+        res.end('Failed to append data. ' + error.message);
+      });
+
+      request.write(newValue);
+      request.end();
     });
   }
 });
