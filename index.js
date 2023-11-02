@@ -1,6 +1,7 @@
 const http = require('http');
 const https = require('https');
 const fs = require('fs');
+const { URL } = require('url');
 const port = process.env.PORT || 3000;
 
 const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv';
@@ -60,10 +61,81 @@ const server = http.createServer((req, res) => {
         res.write('});');
         res.write('</script>');
 
+        // Add the data input form
+        res.write(`
+          <form method="POST" action="/addData">
+            <label for="date">Date: </label>
+            <input type="text" name="date" id="date" required><br><br>
+            <label for="value">Value: </label>
+            <input type="text" name="value" id="value" required><br><br>
+            <input type="submit" value="Add Data">
+          </form>
+        `);
+
         res.write('</body></html>');
         res.end();
       });
     });
+  } else if (req.method === 'POST') {
+    const url = new URL(req.url, `http://localhost:${port}`);
+    if (url.pathname === '/addData') {
+      let requestBody = '';
+      req.on('data', (data) => {
+        requestBody += data;
+      });
+
+      req.on('end', () => {
+        const formData = new URLSearchParams(requestBody);
+
+        // Extract date and value from the form data
+        const date = formData.get('date');
+        const value = formData.get('value');
+
+        // Append the data to the blob
+        const appendUrl = 'https://myappendblobstore.blob.core.windows.net/myappendblobcontaiter/appendblob01?comp=appendblock';
+
+        const appendData = `${date};${value}\n`;
+
+        const options = {
+          method: 'PUT',
+          headers: {
+            'x-ms-blob-type': 'AppendBlob',
+            'Content-Length': appendData.length,
+          },
+        };
+
+        const appendReq = https.request(appendUrl, options, (appendRes) => {
+          if (appendRes.statusCode === 201) {
+            // Data appended successfully
+            res.statusCode = 200;
+            res.setHeader('Content-Type', 'text/html');
+            res.write('<html><body>');
+            res.write('<p>Data has been added successfully.</p>');
+
+            // Redisplay the form
+            res.write(`
+              <form method="POST" action="/addData">
+                <label for="date">Date: </label>
+                <input type="text" name="date" id="date" required><br><br>
+                <label for="value">Value: </label>
+                <input type="text" name="value" id="value" required><br><br>
+                <input type="submit" value="Add Data">
+              </form>
+            `);
+
+            res.write('</body></html>');
+            res.end();
+          } else {
+            // Handle errors
+            res.statusCode = 500;
+            res.end('Error appending data to the blob.');
+          }
+        });
+
+        appendReq.write(appendData);
+        appendReq.end();
+      });
+    }
   }
 });
 
