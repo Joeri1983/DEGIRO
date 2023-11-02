@@ -10,18 +10,21 @@ const server = http.createServer(async (req, res) => {
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html');
     res.write('<html><body>');
-    res.write('<form method="POST">');
-    res.write('<label for="numericValue">Enter a numeric value:</label>');
-    res.write('<input type="number" id="numericValue" name="numericValue"><br>');
-    res.write('<input type="submit" value="Submit">');
-    res.write('</form>');
     res.write('<p>Contents of waardes.csv:</p>');
     
-    // Fetch and display the contents of waardes.csv (if needed)
-    // ...
+    // Fetch and display the contents of waardes.csv
+    https.get(azureStorageUrl, (response) => {
+      let data = '';
+      response.on('data', (chunk) => {
+        data += chunk;
+      });
 
-    res.write('</body></html>');
-    res.end();
+      response.on('end', () => {
+        res.write(`<pre>${data}</pre>`);
+        res.write('</body></html>');
+        res.end();
+      });
+    });
   } else if (req.method === 'POST') {
     // Handle form submission
     let data = '';
@@ -57,10 +60,19 @@ const server = http.createServer(async (req, res) => {
           res.write(`<p>Entered numeric value: ${numericValue}</p>`);
           res.write(`<p>Current Date: ${currentDate}</p>`);
           res.write('<p>Contents of waardes.csv:</p>');
-          // Fetch and display the updated contents of waardes.csv (if needed)
-          // ...
-          res.write('</body></html>');
-          res.end();
+          // Fetch and display the updated contents of waardes.csv
+          https.get(azureStorageUrl, (response) => {
+            let updatedData = '';
+            response.on('data', (chunk) => {
+              updatedData += chunk;
+            });
+
+            response.on('end', () => {
+              res.write(`<pre>${updatedData}</pre>`);
+              res.write('</body></html>');
+              res.end();
+            });
+          });
         } else {
           // Append operation failed
           res.statusCode = response.statusCode;
