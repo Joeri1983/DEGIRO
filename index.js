@@ -2,7 +2,7 @@ const http = require('http');
 const https = require('https');
 const port = process.env.PORT || 3000;
 
-const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv?sp=rw&st=2023-11-01T12:27:32Z&se=2023-11-01T20:27:32Z&spr=https&sv=2022-11-02&sr=c&sig=ndoa3k5uFv0yLUFOR17nkKFhj2zpJaKe3gzixg7z9yw%3D';
+const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv?sp=r&st=2023-11-02T08:49:06Z&se=2024-01-11T16:49:06Z&spr=https&sv=2022-11-02&sr=b&sig=jWGapwQxRVoKb2uq6fQJRHp5XKFQbSK8HD5RbCus2IM%3D';
 
 const server = http.createServer(async (req, res) => {
   if (req.method === 'GET') {
