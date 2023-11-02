@@ -51,11 +51,13 @@ const server = http.createServer((req, res) => {
             res.setHeader('Location', '/');
             res.end();
           } else {
-            res.statusCode = response.status;
-            res.end('Error appending to the CSV file in Azure Blob Storage.');
+            console.error('Error: Unable to append data. Status code:', response.status);
+            res.statusCode = 500;
+            res.end('Failed to append data.');
           }
         })
         .catch((error) => {
+          console.error('Error: Failed to append data.', error);
           res.statusCode = 500;
           res.end('Failed to append data. ' + error.message);
         });
