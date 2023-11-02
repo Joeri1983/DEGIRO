@@ -27,7 +27,11 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.write('<html><body>');
-        res.write('<p>Values:</p>');
+
+        // Add an input bar at the top of the webpage
+        res.write('<input type="text" id="searchInput" placeholder="Enter a value" oninput="searchValue()">');
+        
+        res.write('<p>Graph:</p>');
 
         // Create a canvas for the chart
         res.write('<canvas id="myChart" width="400" height="200"></canvas>');
@@ -58,6 +62,22 @@ const server = http.createServer((req, res) => {
         res.write('}');
         res.write('}');
         res.write('});');
+        res.write('function searchValue() {');
+        res.write('var input, filter, ul, li, a, i, txtValue;');
+        res.write('input = document.getElementById("searchInput");');
+        res.write('filter = input.value;');
+        res.write('ul = document.getElementById("myChart");');
+        res.write('li = ul.getElementsByTagName("li");');
+        res.write('for (i = 0; i < li.length; i++) {');
+        res.write('a = li[i].getElementsByTagName("a")[0];');
+        res.write('txtValue = a.textContent || a.innerText;');
+        res.write('if (txtValue.indexOf(filter) > -1) {');
+        res.write('li[i].style.display = "";');
+        res.write('} else {');
+        res.write('li[i].style.display = "none";');
+        res.write('}');
+        res.write('}');
+        res.write('}');
         res.write('</script>');
 
         res.write('</body></html>');
