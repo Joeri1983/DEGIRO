@@ -11,7 +11,7 @@ const server = http.createServer((req, res) => {
     res.setHeader('Content-Type', 'text/html');
     res.write('<html><body>');
     res.write('<p>Latest 3 values from waardes.csv sorted by date:</p>');
-    
+
     // Fetch and display the contents of waardes.csv
     https.get(azureStorageUrl, (response) => {
       let data = '';
@@ -23,7 +23,7 @@ const server = http.createServer((req, res) => {
         const lines = data.trim().split('\n');
         const sortedLines = lines
           .map((line) => {
-            const columns = line.split(',');
+            const columns = line.split(';'); // Change the separator to semicolon
             return {
               date: columns[0],
               value: columns[1],
