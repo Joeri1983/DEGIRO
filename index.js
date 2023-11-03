@@ -7,7 +7,7 @@ const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waar
 
 const server = http.createServer((req, res) => {
   if (req.method === 'GET') {
-    // Fetch and display the contents of waardes.csv
+    // Fetch  and display the contents of waardes.csv
     https.get(azureStorageUrl, (response) => {
       let data = '';
       response.on('data', (chunk) => {
