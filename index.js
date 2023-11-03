@@ -35,9 +35,6 @@ const server = http.createServer((req, res) => {
         });
         res.write('</select>');
 
-        // Add a button to calculate and update the chart
-        res.write('<button onclick="calculatePercentageDifference()">Calculate</button>');
-
         // Create a canvas for the chart
         res.write('<canvas id="myChart" width="400" height="200"></canvas>');
 
@@ -63,22 +60,36 @@ const server = http.createServer((req, res) => {
         res.write('y: {');
         res.write('beginAtZero: true');
         res.write('}');
-        res.write('}');
-        res.write('}');
+        res.write('},');
+        res.write('plugins: {');
+        res.write('tooltip: {');
+        res.write('callbacks: {');
+        res.write('title: function(context) {');
+        res.write('return context[0].label;');
+        res.write('},');
+        res.write('label: function(context) {');
+        res.write('var selectedIndex = document.getElementById("valueSelector").value;');
+        res.write('var selectedValue = chartData[selectedIndex];');
+        res.write('var percentageDifference = ((context.parsed.y - selectedValue) / selectedValue) * 100;');
+        res.write('return "Percentage Difference: " + percentageDifference.toFixed(2) + "%";');
+        res.write('},');
+        res.write('},');
+        res.write('},');
+        res.write('},');
         res.write('});');
 
-        // JavaScript function to calculate and update percentage difference
-        res.write('function calculatePercentageDifference() {');
-        res.write('var select = document.getElementById("valueSelector");');
-        res.write('var selectedIndex = select.value;');
+        // Add a change event listener for the valueSelector dropdown
+        res.write('document.getElementById("valueSelector").addEventListener("change", function () {');
+        res.write('var selectedIndex = this.value;');
         res.write('var selectedValue = chartData[selectedIndex];');
-        res.write('var percentageDifference = ((selectedValue - chartData[0]) / chartData[0]) * 100;');
-        res.write('document.getElementById("percentageDifference").innerText = "Percentage Difference: " + percentageDifference.toFixed(2) + "%";');
-        res.write('}');
+        res.write('var tooltip = chart.getPlugin("tooltip");');
+        res.write('tooltip.options.callbacks.label = function(context) {');
+        res.write('var percentageDifference = ((context.parsed.y - selectedValue) / selectedValue) * 100;');
+        res.write('return "Percentage Difference: " + percentageDifference.toFixed(2) + "%";');
+        res.write('};');
+        res.write('chart.update();');
+        res.write('});');
         res.write('</script>');
-
-        // Display the percentage difference
-        res.write('<div id="percentageDifference"></div>');
 
         res.write('</body></html>');
         res.end();
