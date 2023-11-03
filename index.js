@@ -7,7 +7,7 @@ const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waar
 
 const server = http.createServer((req, res) => {
   if (req.method === 'GET') {
-    // Fetch  and display the contents of waardes.csv
+    // Fetch and display the contents of waardes.csv
     https.get(azureStorageUrl, (response) => {
       let data = '';
       response.on('data', (chunk) => {
@@ -15,12 +15,12 @@ const server = http.createServer((req, res) => {
       });
 
       response.on('end', () => {
-        const lines = data.trim().split('\n');
+        const lines = data.trim().split(',');
         const values = lines.map((line) => {
-          const columns = line.split(';');
+          const [date, value] = line.split(':');
           return {
-            date: columns[0],
-            value: columns[1],
+            date: date,
+            value: value,
           };
         });
 
