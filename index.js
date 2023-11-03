@@ -27,7 +27,6 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.write('<html><body>');
-        res.write('<p>Values:</p>');
 
         // Create a canvas for the chart
         res.write('<canvas id="myChart" width="400" height="200"></canvas>');
