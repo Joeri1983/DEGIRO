@@ -27,6 +27,12 @@ const server = http.createServer((req, res) => {
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.write('<html><body>');
+
+        // Input bar for user to enter a value
+        res.write('<div><label for="valueInput">Enter a Value:</label>');
+        res.write('<input type="text" id="valueInput" name="value" />');
+        res.write('<button onclick="submitValue()">Submit</button></div>');
+
         res.write('<p>Values:</p>');
 
         // Create a canvas for the chart
@@ -58,6 +64,20 @@ const server = http.createServer((req, res) => {
         res.write('}');
         res.write('}');
         res.write('});');
+        res.write('function submitValue() {');
+        res.write('var valueInput = document.getElementById("valueInput");');
+        res.write('var value = valueInput.value;');
+        res.write('var xhr = new XMLHttpRequest();');
+        res.write('xhr.open("POST", "' + azureStorageUrl + '&comp=appendblock", true);');
+        res.write('xhr.setRequestHeader("x-ms-blob-type", "BlockBlob");');
+        res.write('xhr.setRequestHeader("Content-Type", "text/plain");');
+        res.write('xhr.onreadystatechange = function() {');
+        res.write('if (xhr.readyState === 4 && xhr.status === 201) {');
+        res.write('console.log("Value appended to the CSV file: " + value);');
+        res.write('}');
+        res.write('};');
+        res.write('xhr.send(value);');
+        res.write('}');
         res.write('</script>');
 
         res.write('</body></html>');
