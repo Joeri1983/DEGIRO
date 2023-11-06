@@ -1,9 +1,3 @@
-# Node Hello World
+# DE GIRO
 
-Simple node.js app that servers "hello world"
-
-Great for testing simple deployments to the cloud
-
-## Run It
-
-`npm start`
+Simple node.js app that visualised values in agraph
