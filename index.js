@@ -7,8 +7,8 @@ const port = process.env.PORT || 3000;
 // Middleware to parse JSON payloads
 app.use(bodyParser.json());
 
-// Define an API route that accepts JSON payload
-app.post('/your-api-endpoint', (req, res) => {
+// Define an API route that accepts JSON payload at /input
+app.post('/input', (req, res) => {
   const payload = req.body;
 
   // Check if "waarde" exists in the JSON payload
@@ -18,6 +18,12 @@ app.post('/your-api-endpoint', (req, res) => {
   } else {
     res.status(400).json({ error: 'Invalid JSON payload. "waarde" is missing.' });
   }
+});
+
+// Define a route for a GET request to generate a random number
+app.get('/random', (req, res) => {
+  const randomValue = Math.floor(Math.random() * 100) + 1;
+  res.status(200).json({ value: randomValue });
 });
 
 app.listen(port, () => {
