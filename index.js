@@ -1,10 +1,30 @@
 const http = require('http');
 const https = require('https');
-const fs = require('fs');
-const port = process.env.PORT || 3000;
+const express = require('express');
+const bodyParser = require('body-parser');
+
+const app = express();
+const port = process.env.PORT || 8080; // Change the port to 8080
 
 const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv';
 
+// Middleware to parse JSON payloads
+app.use(bodyParser.json());
+
+// Create an API route that accepts JSON payloads at /waarde
+app.post('/waarde', (req, res) => {
+  const payload = req.body;
+
+  // Check if "waarde" exists in the JSON payload
+  if (payload && payload.waarde) {
+    const waardeValue = payload.waarde;
+    res.status(200).json({ message: `Received "waarde" with value: ${waardeValue}` });
+  } else {
+    res.status(400).json({ error: 'Invalid JSON payload. "waarde" is missing.' });
+  }
+});
+
+// Create your server with the existing code
 const server = http.createServer((req, res) => {
   if (req.method === 'GET') {
     // Fetch and display the contents of waardes.csv
@@ -66,6 +86,7 @@ const server = http.createServer((req, res) => {
   }
 });
 
-server.listen(port, () => {
+// Add the Express app to your server
+app.listen(port, () => {
   console.log(`Server running on http://localhost:${port}/`);
 });
