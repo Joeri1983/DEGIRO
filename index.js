@@ -63,13 +63,15 @@ const server = http.createServer((req, res) => {
           res.write('});');
 
           res.write('document.getElementById("loadMore").addEventListener("click", function() {');
-          startIndex = Math.max(0, startIndex - 25); // Update start and end indices for the next slice
-          endIndex = Math.min(values.length, endIndex - 25);
-          const moreData = values.slice(startIndex, endIndex).map((line) => line.value);
-          const moreLabels = values.slice(startIndex, endIndex).map((line) => line.date);
-          res.write('myChart.data.labels = myChart.data.labels.concat(moreLabels);');
-          res.write('myChart.data.datasets[0].data = myChart.data.datasets[0].data.concat(moreData);');
-          res.write('myChart.update();');
+          if (startIndex > 0) {
+            startIndex = Math.max(0, startIndex - 25); // Update start and end indices for the next slice
+            endIndex = Math.min(values.length, endIndex - 25);
+            const moreData = values.slice(startIndex, startIndex + 50).map((line) => line.value);
+            const moreLabels = values.slice(startIndex, startIndex + 50).map((line) => line.date);
+            res.write('myChart.data.labels = [].concat(moreLabels, myChart.data.labels);');
+            res.write('myChart.data.datasets[0].data = [].concat(moreData, myChart.data.datasets[0].data);');
+            res.write('myChart.update();');
+          }
           res.write('});');
 
           res.write('</script>');
