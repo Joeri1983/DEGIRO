@@ -13,8 +13,8 @@ const server = http.createServer((req, res) => {
       });
 
       response.on('end', () => {
-        let lines = data.trim().split(',');
-        let values = lines.map((line) => {
+        const lines = data.trim().split(',');
+        const values = lines.map((line) => {
           const [date, value] = line.split(':');
           return {
             date: date,
@@ -22,9 +22,11 @@ const server = http.createServer((req, res) => {
           };
         });
 
-        // Function to send a portion of the values
-        function sendValues(sliceCount) {
-          const slicedValues = values.slice(0, sliceCount);
+        let startIndex = Math.max(0, values.length - 50); // Start index for the initial display
+        let endIndex = Math.min(values.length, startIndex + 50); // End index for the initial display
+
+        function sendValues(start, end) {
+          const slicedValues = values.slice(start, end);
 
           res.statusCode = 200;
           res.setHeader('Content-Type', 'text/html');
@@ -32,7 +34,7 @@ const server = http.createServer((req, res) => {
 
           res.write('<canvas id="myChart" width="400" height="200"></canvas>');
 
-          res.write('<button id="loadMore">Load 25 More Records</button>');
+          res.write('<button id="loadMore">Load 25 Older Records</button>');
 
           res.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>');
           res.write('<script>');
@@ -61,8 +63,10 @@ const server = http.createServer((req, res) => {
           res.write('});');
 
           res.write('document.getElementById("loadMore").addEventListener("click", function() {');
-          res.write('var moreData = ' + JSON.stringify(values.slice(sliceCount, sliceCount + 25).map((line) => line.value)) + ';');
-          res.write('var moreLabels = ' + JSON.stringify(values.slice(sliceCount, sliceCount + 25).map((line) => line.date)) + ';');
+          startIndex = Math.max(0, startIndex - 25); // Update start and end indices for the next slice
+          endIndex = Math.min(values.length, endIndex - 25);
+          const moreData = values.slice(startIndex, endIndex).map((line) => line.value);
+          const moreLabels = values.slice(startIndex, endIndex).map((line) => line.date);
           res.write('myChart.data.labels = myChart.data.labels.concat(moreLabels);');
           res.write('myChart.data.datasets[0].data = myChart.data.datasets[0].data.concat(moreData);');
           res.write('myChart.update();');
@@ -74,8 +78,7 @@ const server = http.createServer((req, res) => {
           res.end();
         }
 
-        // Initially, display the first 25 records
-        sendValues(25);
+        sendValues(startIndex, endIndex);
       });
     });
   }
