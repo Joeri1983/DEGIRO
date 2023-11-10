@@ -22,9 +22,11 @@ const server = http.createServer((req, res) => {
           };
         });
 
-        // Function to send a portion of the values
-        function sendValues(sliceCount) {
-          const slicedValues = values.slice(0, sliceCount);
+        let currentIndex = 0;
+
+        function sendValues() {
+          const slicedValues = values.slice(currentIndex, currentIndex + 25);
+          currentIndex += 25;
 
           res.statusCode = 200;
           res.setHeader('Content-Type', 'text/html');
@@ -61,8 +63,8 @@ const server = http.createServer((req, res) => {
           res.write('});');
 
           res.write('document.getElementById("loadMore").addEventListener("click", function() {');
-          res.write('var moreData = ' + JSON.stringify(values.slice(sliceCount, sliceCount + 25).map((line) => line.value)) + ';');
-          res.write('var moreLabels = ' + JSON.stringify(values.slice(sliceCount, sliceCount + 25).map((line) => line.date)) + ';');
+          res.write('var moreData = ' + JSON.stringify(values.slice(currentIndex, currentIndex + 25).map((line) => line.value)) + ';');
+          res.write('var moreLabels = ' + JSON.stringify(values.slice(currentIndex, currentIndex + 25).map((line) => line.date)) + ';');
           res.write('myChart.data.labels = myChart.data.labels.concat(moreLabels);');
           res.write('myChart.data.datasets[0].data = myChart.data.datasets[0].data.concat(moreData);');
           res.write('myChart.update();');
@@ -75,7 +77,7 @@ const server = http.createServer((req, res) => {
         }
 
         // Initially, display the first 25 records
-        sendValues(25);
+        sendValues();
       });
     });
   }
