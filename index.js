@@ -1,13 +1,11 @@
 const http = require('http');
 const https = require('https');
-const fs = require('fs');
 const port = process.env.PORT || 3000;
 
 const azureStorageUrl = 'https://storagejoeri.blob.core.windows.net/dgjoeri/waardes.csv';
 
 const server = http.createServer((req, res) => {
   if (req.method === 'GET') {
-    // Fetch and display the contents of waardes.csv
     https.get(azureStorageUrl, (response) => {
       let data = '';
       response.on('data', (chunk) => {
@@ -24,19 +22,20 @@ const server = http.createServer((req, res) => {
           };
         });
 
+        // Extract the latest 50 entries
+        const latestValues = values.slice(-50);
+
         res.statusCode = 200;
         res.setHeader('Content-Type', 'text/html');
         res.write('<html><body>');
 
-        // Create a canvas for the chart
         res.write('<canvas id="myChart" width="400" height="200"></canvas>');
 
-        // Generate the chart using Chart.js
         res.write('<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>');
         res.write('<script>');
         res.write('var ctx = document.getElementById("myChart").getContext("2d");');
-        res.write('var labels = ' + JSON.stringify(values.map((line) => line.date)) + ';');
-        res.write('var data = ' + JSON.stringify(values.map((line) => line.value)) + ';');
+        res.write('var labels = ' + JSON.stringify(latestValues.map((line) => line.date)) + ';');
+        res.write('var data = ' + JSON.stringify(latestValues.map((line) => line.value)) + ';');
         res.write('var myChart = new Chart(ctx, {');
         res.write('type: "line",');
         res.write('data: {');
