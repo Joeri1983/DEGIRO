@@ -65,7 +65,6 @@ const server = http.createServer((req, res) => {
           res.write('document.getElementById("loadMore").addEventListener("click", function() {');
           if (startIndex > 0) {
             startIndex = Math.max(0, startIndex - 25);
-            endIndex = Math.min(values.length, endIndex - 25);
             const moreData = values.slice(startIndex, endIndex).map((line) => line.value);
             const moreLabels = values.slice(startIndex, endIndex).map((line) => line.date);
             res.write('myChart.data.labels = [].concat(moreLabels, myChart.data.labels.slice(0, -25));');
