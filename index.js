@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
     let recordsToShow = 25; // Default number of records to show
     if (req.url.includes('/show')) {
       const requestedRecords = req.url.split('/show')[1];
-      if (requestedRecords === '25' || requestedRecords === '50' || requestedRecords === '100' || requestedRecords === '250' || requestedRecords === '500' || requestedRecords === '1000' || requestedRecords === '2500') {
+      if (requestedRecords === '25' || requestedRecords === '50' || requestedRecords === '100' || requestedRecords === '250' || requestedRecords === '500' || requestedRecords === '1000' || requestedRecords === '2500' || requestedRecords === '5000') {
         recordsToShow = parseInt(requestedRecords);
       }
     }
@@ -46,6 +46,7 @@ const server = http.createServer((req, res) => {
         res.write(`<button onclick="window.location.href='/show500'">Show 500 records</button>`);
         res.write(`<button onclick="window.location.href='/show1000'">Show 1000 records</button>`);
         res.write(`<button onclick="window.location.href='/show2500'">Show 2500 records</button>`);
+        res.write(`<button onclick="window.location.href='/show2500'">Show 5000 records</button>`);
 
         // Create a canvas for the chart
         res.write('<canvas id="myChart" width="400" height="200"></canvas>');
