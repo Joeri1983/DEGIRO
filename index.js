@@ -10,7 +10,7 @@ const server = http.createServer((req, res) => {
     let recordsToShow = 25; // Default number of records to show
     if (req.url.includes('/show')) {
       const requestedRecords = req.url.split('/show')[1];
-      if (requestedRecords === '25' || requestedRecords === '50' || requestedRecords === '100' || requestedRecords === '250' || requestedRecords === '500' || requestedRecords === '1000' || requestedRecords === '2500' || requestedRecords === '5000') {
+      if (requestedRecords === '15' || requestedRecords === '50' || requestedRecords === '100' || requestedRecords === '250' || requestedRecords === '500' || requestedRecords === '1000' || requestedRecords === '2500' || requestedRecords === '5000') {
         recordsToShow = parseInt(requestedRecords);
       }
     }
